@@ -1,0 +1,16 @@
+{
+  "name": "anykv",
+  "description": "The monorepo for AnyKV",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build:anykv": "cd packages/anykv && bun run build",
+    "publish:anykv": "npm publish -w packages/anykv",
+    "build:adapter-sqlite": "cd packages/adapter-sqlite && bun run build"
+  },
+  "devDependencies": {
+    "anykv": "workspace:*"
+  }
+}

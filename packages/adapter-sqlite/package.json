@@ -1,0 +1,27 @@
+{
+  "name": "@anykv/adapter-sqlite",
+  "version": "0.0.1",
+  "description": "AnyKV SQLite adapter.",
+  "author": "mivinci <mivinci@qq.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outfile=dist/index.js && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halobase/anykv.git"
+  },
+  "keywords": [],
+  "dependencies": {
+    "anykv": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.0.4",
+    "typescript": "^5.3.3"
+  }
+}

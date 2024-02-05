@@ -1,0 +1,24 @@
+{
+  "name": "anykv",
+  "version": "0.0.1",
+  "description": "A service layer abstracting away different databases.",
+  "author": "mivinci <mivinci@qq.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "bun build src/index.ts --outfile=dist/index.js && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halobase/anykv.git"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@types/bun": "^1.0.4",
+    "typescript": "^5.3.3"
+  }
+}

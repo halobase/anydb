@@ -1,2 +1,3 @@
-# anydb
-The monrepo for AnyDB - a service layer abstract away multiple databases.
+# AnyKV
+
+The monrepo for AnyKV - a service layer abstracting away different databases.

@@ -1,0 +1,8 @@
+{
+  "name": "@anykv/tests",
+  "private": true,
+  "dependencies": {
+    "@anykv/adapter-sqlite": "workspace:*",
+    "anykv": "workspace:*"
+  }
+}
