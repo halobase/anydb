@@ -2,12 +2,18 @@ type Adapters = keyof AdapterOptions;
 
 type AdapterOptions = {
   sqlite: SQLiteOptions,
+  surrealdb: SurrealDBOptions,
   redis: RedisOptions,
 }
 
 type SQLiteOptions = OpenOptions & {
   path: string,
   wal?: boolean,
+};
+
+type SurrealDBOptions = OpenOptions & {
+  url: URL | string,
+  fetch: typeof fetch,
 };
 
 type RedisOptions = OpenOptions & {
@@ -20,14 +26,17 @@ type OpenOptions = {
   namespace?: string,
   database?: string,
   readonly?: boolean,
+  auth?: Auth,
 };
 
 type OperationOptions = {
-  token?: string,
+  auth?: Auth,
   query?: URLSearchParams,
   order?: string,
   desc?: boolean,
 };
+
+export type Auth = string | { user: string, pass: string };
 
 export type ListOptions = OperationOptions & {};
 
@@ -69,7 +78,7 @@ export interface Operations<T extends Adapters> {
   delete<T>(key: string, opts?: DeleteOptions): Promise<T[]>
   list<T>(key: string, opts?: ListOptions): Promise<T[]>
   patch<T>(key: string, patches: Patch[], opts?: PatchOptions): Promise<T[]>
-  watch<T>(key: string, handler: EventHandler<T>, opts?: WatchOptions): void
+  watch<T>(key: string, handler: EventHandler<T>, opts?: WatchOptions): Promise<void>
   execute<T>(sql: string, vars: Record<string, unknown>, opts?: ExecuteOptions): Promise<T>
 };
 
@@ -100,7 +109,7 @@ export class AnyKV<T extends Adapters> implements Operations<T> {
     return this.#adapter.patch(key, patches, opts);
   }
 
-  watch<T>(key: string, handler: EventHandler<T>, opts?: OperationOptions): void {
+  async watch<T>(key: string, handler: EventHandler<T>, opts?: OperationOptions): Promise<void> {
     return this.#adapter.watch(key, handler, opts);
   }
 
@@ -120,6 +129,7 @@ export class AnyKV<T extends Adapters> implements Operations<T> {
 function dynamic_import_sync<T extends Adapters>(id: T): Adapter<T> {
   const names = {
     "sqlite": "@anykv/adapter-sqlite",
+    "surrealdb": "@anykv/adapter-surrealdb",
     "redis": "@anykv/adapter-redis",
   };
 
@@ -132,7 +142,7 @@ function dynamic_import_sync<T extends Adapters>(id: T): Adapter<T> {
     return require(name).default;
   } catch {
     throw new Error(
-`Module "${name}" not found. Install it using one of
+      `Module "${name}" not found. Install it using one of
 
   bun add ${name}
   npm install ${name}

@@ -1,7 +1,7 @@
 {
-  "name": "@anykv/adapter-sqlite",
+  "name": "@anykv/adapter-surrealdb",
   "version": "0.0.1",
-  "description": "AnyKV SQLite adapter.",
+  "description": "AnyKV SurrealDB adapter.",
   "author": "mivinci <mivinci@qq.com>",
   "type": "module",
   "main": "dist/index.js",
