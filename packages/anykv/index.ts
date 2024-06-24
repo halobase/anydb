@@ -57,13 +57,13 @@ export type Event<T> = {
 
 export type EventHandler<T> = (e: Event<T>) => Promise<void>;
 
-export interface Adapter<A extends Adapters> extends Operations<A> {
-  new(opts: Options<A>): Adapter<A>
+export interface Adapter<T extends Adapters> extends Operations<T> {
+  new(opts: Options<T>): Adapter<T>
 };
 
-export type Options<A extends Adapters> = AdapterOptions[A];
+export type Options<T extends Adapters> = AdapterOptions[T];
 
-export interface Operations<A extends Adapters> {
+export interface Operations<T extends Adapters> {
   create<T>(key: string, init: Partial<T>, opts?: CreateOptions): Promise<T>
   update<T>(key: string, init: Partial<T>, opts?: UpdateOptions): Promise<T[]>
   delete<T>(key: string, opts?: DeleteOptions): Promise<T[]>
@@ -73,9 +73,9 @@ export interface Operations<A extends Adapters> {
   execute<T>(sql: string, vars: Record<string, unknown>, opts?: ExecuteOptions): Promise<T>
 };
 
-export class AnyKV<A extends Adapters> implements Operations<A> {
-  #adapter: Adapter<A>
-  constructor(private name: A, private opts: Options<A>) {
+export class AnyKV<T extends Adapters> implements Operations<T> {
+  #adapter: Adapter<T>
+  constructor(private name: T, private opts: Options<T>) {
     const adapter_type = dynamic_import_sync(this.name);
     this.#adapter = new adapter_type(opts);
   }
