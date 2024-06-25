@@ -1,11 +1,3 @@
-type Adapters = keyof AdapterOptions;
-
-type AdapterOptions = {
-  sqlite: SQLiteOptions,
-  surrealdb: SurrealDBOptions,
-  redis: RedisOptions,
-}
-
 type SQLiteOptions = OpenOptions & {
   path: string,
   wal?: boolean,
@@ -36,6 +28,14 @@ type OperationOptions = {
   desc?: boolean,
 };
 
+type Adapters = keyof AdapterOptions;
+
+export type AdapterOptions = {
+  sqlite: SQLiteOptions,
+  surrealdb: SurrealDBOptions,
+  redis: RedisOptions,
+}
+
 export type Auth = string | { user: string, pass: string };
 
 export type ListOptions = OperationOptions & {};
@@ -65,56 +65,57 @@ export type Event<T> = {
 };
 
 export type EventHandler<T> = (e: Event<T>) => Promise<void>;
+export type EventCloser = () => Promise<void>;
 
-export interface Adapter<T extends Adapters> extends Operations<T> {
-  new(opts: Options<T>): Adapter<T>
+export interface Adapter<T extends Adapters> extends Operations {
+  new(opts: AdapterOptions[T]): Adapter<T>
 };
 
-export type Options<T extends Adapters> = AdapterOptions[T];
-
-export interface Operations<T extends Adapters> {
+export interface Operations {
   create<T>(key: string, init: Partial<T>, opts?: CreateOptions): Promise<T>
   update<T>(key: string, init: Partial<T>, opts?: UpdateOptions): Promise<T[]>
   delete<T>(key: string, opts?: DeleteOptions): Promise<T[]>
   list<T>(key: string, opts?: ListOptions): Promise<T[]>
   patch<T>(key: string, patches: Patch[], opts?: PatchOptions): Promise<T[]>
-  watch<T>(key: string, handler: EventHandler<T>, opts?: WatchOptions): Promise<void>
+  watch<T>(key: string, handler: EventHandler<T>, opts?: WatchOptions): Promise<EventCloser>
   execute<T>(sql: string, vars: Record<string, unknown>, opts?: ExecuteOptions): Promise<T>
 };
 
-export class AnyKV<T extends Adapters> implements Operations<T> {
+export class AnyKV<T extends Adapters> implements Operations {
+
   #adapter: Adapter<T>
-  constructor(private name: T, private opts: Options<T>) {
+
+  constructor(private name: T, private opts: AdapterOptions[T]) {
     const adapter_type = dynamic_import_sync(this.name);
     this.#adapter = new adapter_type(opts);
   }
 
-  async create<T>(key: string, init: Partial<T>, opts?: CreateOptions): Promise<T> {
-    return this.#adapter.create(key, init, opts);
+  async create<T>(key: string, init: Partial<T>, opts?: CreateOptions) {
+    return this.#adapter.create<T>(key, init, opts);
   }
 
-  async update<T>(key: string, init: Partial<T>, opts?: UpdateOptions): Promise<T[]> {
-    return this.#adapter.update(key, init, opts);
+  async update<T>(key: string, init: Partial<T>, opts?: UpdateOptions) {
+    return this.#adapter.update<T>(key, init, opts);
   }
 
-  async delete<T>(key: string, opts?: DeleteOptions): Promise<T[]> {
-    return this.#adapter.delete(key, opts);
+  async delete<T>(key: string, opts?: DeleteOptions) {
+    return this.#adapter.delete<T>(key, opts);
   }
 
-  async list<T>(key: string, opts?: ListOptions): Promise<T[]> {
-    return this.#adapter.list(key, opts);
+  async list<T>(key: string, opts?: ListOptions) {
+    return this.#adapter.list<T>(key, opts);
   }
 
-  async patch<T>(key: string, patches: Patch[], opts?: OperationOptions): Promise<T[]> {
-    return this.#adapter.patch(key, patches, opts);
+  async patch<T>(key: string, patches: Patch[], opts?: PatchOptions) {
+    return this.#adapter.patch<T>(key, patches, opts);
   }
 
-  async watch<T>(key: string, handler: EventHandler<T>, opts?: OperationOptions): Promise<void> {
-    return this.#adapter.watch(key, handler, opts);
+  async watch<T>(key: string, handler: EventHandler<T>, opts?: WatchOptions) {
+    return this.#adapter.watch<T>(key, handler, opts);
   }
 
-  async execute<T>(sql: string, vars: Record<string, unknown>, opts?: OperationOptions): Promise<T> {
-    return this.#adapter.execute(sql, vars, opts);
+  async execute<T>(sql: string, vars: Record<string, unknown>, opts?: ExecuteOptions) {
+    return this.#adapter.execute<T>(sql, vars, opts);
   }
   /**
    * GET /keys
@@ -150,5 +151,3 @@ function dynamic_import_sync<T extends Adapters>(id: T): Adapter<T> {
     );
   }
 }
-
-export const version = "0.0.1"

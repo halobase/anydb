@@ -1,4 +1,4 @@
-import type { Adapter, Auth, CreateOptions, DeleteOptions, EventHandler, ExecuteOptions, ListOptions, Options, Patch, PatchOptions, UpdateOptions, WatchOptions } from "anykv";
+import type { Adapter, AdapterOptions, Auth, CreateOptions, DeleteOptions, EventCloser, EventHandler, ExecuteOptions, ListOptions, Patch, PatchOptions, UpdateOptions, WatchOptions } from "anykv";
 
 type ResponseStatus = "OK" | "ERR";
 type Response<T> = {
@@ -9,8 +9,9 @@ type Response<T> = {
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-export default class SurrealDBAdapter<A extends "surrealdb"> implements Adapter<A> {
-  constructor(private opts: Options<A>) {}
+
+export default class SurrealDBAdapter implements Adapter<"surrealdb"> {
+  constructor(private opts: AdapterOptions["surrealdb"]) { }
 
   async create<T>(key: string, init: Partial<T>, opts?: CreateOptions) {
     const ls = await this.#rpc<T>("POST", key, init, opts?.auth);
@@ -35,7 +36,7 @@ export default class SurrealDBAdapter<A extends "surrealdb"> implements Adapter<
     return this.#rpc<T>("GET", key, undefined, opts?.auth);
   }
 
-  async watch<T>(key: string, h: EventHandler<T>, opts?: WatchOptions) {
+  async watch<T>(key: string, h: EventHandler<T>, opts?: WatchOptions): Promise<EventCloser> {
     throw new Error("anykv(watch): not implemented yet");
   }
 
